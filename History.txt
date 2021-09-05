@@ -1,0 +1,15 @@
+SCC revision history
+-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+V0.2.1 - 2016-07-31 (FluBBa)
+	Changed to unified assembler style.
+
+V0.2.0 - 2015-05-08 (FluBBa)
+	Rewritten for GCC.
+
+V0.1.0 - 2006-04-30 (FluBBa)
+	First version released.
+
+V0.0.0 - 2006-04-01 (FluBBa)
+	Started coding.
