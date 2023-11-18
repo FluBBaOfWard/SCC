@@ -29,6 +29,8 @@ typedef struct {
 	u8 ch3Volume;
 	u8 ch4Volume;
 	u8 chControl;
+	u8 testReg;
+	u8 padding[3];
 
 	u16 ch0Freq;
 	u16 ch0Addr;
