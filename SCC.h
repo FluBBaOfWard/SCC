@@ -3,18 +3,21 @@
 //  Konami SCC/K051649 sound chip emulator for arm32.
 //
 //  Created by Fredrik Ahlström on 2006-04-01.
-//  Copyright © 2006-2022 Fredrik Ahlström. All rights reserved.
+//  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
 //
 
 #ifndef SCC_HEADER
 #define SCC_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
-	ch0Wave[32];
-	ch1Wave[32];
-	ch2Wave[32];
-	ch3Wave[32];
-//	ch4Wave[32];
+	s8 ch0Wave[32];
+	s8 ch1Wave[32];
+	s8 ch2Wave[32];
+	s8 ch3Wave[32];
 	u16 ch0Frq;
 	u16 ch1Frq;
 	u16 ch2Frq;
@@ -37,14 +40,15 @@ typedef struct {
 	u16 ch3Addr;
 	u16 ch4Freq;
 	u16 ch4Addr;
+} SCC;
 
-} scc;
+void SCCReset(SCC *chip);
+void SCCMixer(int len, void *dest, SCC *chip);
+void SCCWrite(u8 value, u16 adress, SCC *chip);
+u8 SCCRead(u16 adress, SCC *chip);
 
-
-void SCCReset(scc *chip);
-void SCCMixer(scc *chip, int len, void *dest);
-void SCCWrite(scc *chip, u8 value);
-void SCCRead(scc *chip, u8 value);
-
-
+#ifdef __cplusplus
+} // extern "C"
 #endif
+
+#endif // SCC_HEADER

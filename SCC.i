@@ -3,7 +3,7 @@
 ;@  Konami SCC/K051649 sound chip emulator for arm32.
 ;@
 ;@  Created by Fredrik Ahlström on 2006-04-01.
-;@  Copyright © 2006-2022 Fredrik Ahlström. All rights reserved.
+;@  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
 ;@
 ;@ ASM header for the Konami SCC emulator
 ;@
@@ -16,7 +16,6 @@
 	sccCh1Wave:		.space 32
 	sccCh2Wave:		.space 32
 	sccCh3Wave:		.space 32
-//	sccCh4Wave:		.space 32
 	sccCh0Frq:		.short 0
 	sccCh1Frq:		.short 0
 	sccCh2Frq:		.short 0
@@ -28,6 +27,8 @@
 	sccCh3Volume:	.byte 0
 	sccCh4Volume:	.byte 0
 	sccChControl:	.byte 0
+	sccTestReg:		.byte 0
+	sccPadding:		.space 3
 
 	sccCh0Freq:		.short 0
 	sccCh0Addr:		.short 0

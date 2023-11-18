@@ -3,7 +3,7 @@
 ;@  Konami SCC/K051649 sound chip emulator for arm32.
 ;@
 ;@  Created by Fredrik Ahlström on 2006-04-01.
-;@  Copyright © 2006-2022 Fredrik Ahlström. All rights reserved.
+;@  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
 ;@
 #ifdef __arm__
 
@@ -104,21 +104,17 @@ vol4:
 	.section .text
 	.align 2
 ;@----------------------------------------------------------------------------
-SCCReset:				;@ sccptr=r12=pointer to struct
+SCCReset:					;@ r0=pointer to SCC struct
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{lr}
-
-	mov r0,sccptr
-	mov r1,#sccSize/4				;@ 144/4=0x24
-	bl memclr_						;@ clear variables
-
-	ldmfd sp!,{lr}
-	bx lr
+	mov r1,#0
+	mov r2,#sccSize				;@ 144
+	b memset					;@ clear variables
 ;@----------------------------------------------------------------------------
-SCCMixer:						;@ r0=len, r1=dest, sccptr=r12=pointer to struct
+SCCMixer:					;@ r0=len, r1=dest, r2=pointer to SCC struct
 ;@----------------------------------------------------------------------------
 	;@ update DMA buffer for PCM
 
+	mov sccptr,r2
 	stmfd sp!,{r4-r11,lr}
 
 ;@--------------------------
@@ -161,7 +157,7 @@ SCCMixer:						;@ r0=len, r1=dest, sccptr=r12=pointer to struct
 	strb r4,[r5]
 
 
-	add r7,sccptr,#sccCh0Freq		;@ counters
+	add r7,sccptr,#sccCh0Freq	;@ counters
 	ldmia r7,{r2-r6}
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh0Frq]
@@ -197,7 +193,7 @@ SCCMixer:						;@ r0=len, r1=dest, sccptr=r12=pointer to struct
 
 	bl SCCMix
 
-	add r7,sccptr,#sccCh0Freq		;@ counters
+	add r7,sccptr,#sccCh0Freq	;@ counters
 	stmia r7,{r2-r6}
 
 	ldmfd sp!,{r4-r11,lr}
@@ -206,17 +202,21 @@ SCCMixer:						;@ r0=len, r1=dest, sccptr=r12=pointer to struct
 SCCVolume:
 	.byte 0,3,7,10,14,17,20,24,27,31,34,37,41,44,48,51
 ;@----------------------------------------------------------------------------
-SCCRead:
-	mov r0,#0xFF
+SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCC
+;@----------------------------------------------------------------------------
+	movs r0,r0,lsl#24
+	ldrbpl r0,[r1,r0,lsr#24]
+	movmi r0,#0xFF
 	bx lr
 ;@----------------------------------------------------------------------------
-SCCWrite:				;@ 0x9800-0x9FFF
+SCCWrite:					;@ 0x9800-0x9FFF, r0=val, r1=adr, r2=SCC
 ;@----------------------------------------------------------------------------
-	and r1,r1,#0xFF
+	and r1,r1,#0xFF				;@ 0x00-0x7F wave ram.
+	cmp r1,#0x90				;@ 0x80-0x8F registers, 0x90-0x9F mirror.
+	subpl r1,r1,#0x10			;@ 0xE0-0xFF test register, all mirrors.
 	cmp r1,#0x90
-	subpl r1,r1,#0x10
-	cmp r1,#0x90
-	strbmi r0,[sccptr,r1]
+	strbmi r0,[r2,r1]
+	strbpl r0,[r2,#sccTestReg]
 	bx lr
 
 ;@----------------------------------------------------------------------------

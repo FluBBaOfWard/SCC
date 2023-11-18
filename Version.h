@@ -1,1 +1,1 @@
-#define ARMSCCVERSION "V0.2.1"
+#define ARMSCCVERSION "V0.2.2"
