@@ -3,7 +3,7 @@
 //  Konami SCC/K051649 sound chip emulator for arm32.
 //
 //  Created by Fredrik Ahlström on 2006-04-01.
-//  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
+//  Copyright © 2006-2024 Fredrik Ahlström. All rights reserved.
 //
 
 #ifndef SCC_HEADER

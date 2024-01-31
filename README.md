@@ -1,4 +1,4 @@
-# SCC
+# SCC V0.2.3
 
 Konami SCC/K051649 sound chip emulator for ARM32.
 
@@ -6,7 +6,7 @@ Konami SCC/K051649 sound chip emulator for ARM32.
 
 First alloc chip struct, call SCCReset.
 Call SCCMixer with length, destination and chip struct.
-Produces 16bit mono.
+Produces signed 16bit mono.
 
 ## Projects that use this code
 

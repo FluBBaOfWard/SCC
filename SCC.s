@@ -3,7 +3,7 @@
 ;@  Konami SCC/K051649 sound chip emulator for arm32.
 ;@
 ;@  Created by Fredrik Ahlström on 2006-04-01.
-;@  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
+;@  Copyright © 2006-2024 Fredrik Ahlström. All rights reserved.
 ;@
 #ifdef __arm__
 
@@ -105,12 +105,23 @@ vol4:
 	.align 2
 ;@----------------------------------------------------------------------------
 SCCReset:					;@ r0=pointer to SCC struct
+	.type   SCCReset STT_FUNC
 ;@----------------------------------------------------------------------------
+	stmfd sp!,{r0,lr}
 	mov r1,#0
 	mov r2,#sccSize				;@ 144
-	b memset					;@ clear variables
+	bl memset					;@ clear variables
+	ldmfd sp!,{r0,lr}
+	mov r1,#0x20
+	strb r1,[r0,#sccCh0Freq+1]	;@ counters
+	strb r1,[r0,#sccCh1Freq+1]	;@ counters
+	strb r1,[r0,#sccCh2Freq+1]	;@ counters
+	strb r1,[r0,#sccCh3Freq+1]	;@ counters
+	strb r1,[r0,#sccCh4Freq+1]	;@ counters
+	bx lr
 ;@----------------------------------------------------------------------------
 SCCMixer:					;@ r0=len, r1=dest, r2=pointer to SCC struct
+	.type   SCCMixer STT_FUNC
 ;@----------------------------------------------------------------------------
 	;@ update DMA buffer for PCM
 
@@ -132,29 +143,25 @@ SCCMixer:					;@ r0=len, r1=dest, r2=pointer to SCC struct
 	ldrbne r4,[sccptr,#sccCh1Volume]
 	ands r4,r4,#0x0F
 	ldrbne r4,[r2,r4]
-	ldr r5,=vol1
-	strb r4,[r5]
+	strb r4,[r5,#vol1-vol0]
 
 	ands r4,r3,#0x04
 	ldrbne r4,[sccptr,#sccCh2Volume]
 	ands r4,r4,#0x0F
 	ldrbne r4,[r2,r4]
-	ldr r5,=vol2
-	strb r4,[r5]
+	strb r4,[r5,#vol2-vol0]
 
 	ands r4,r3,#0x08
 	ldrbne r4,[sccptr,#sccCh3Volume]
 	ands r4,r4,#0x0F
 	ldrbne r4,[r2,r4]
-	ldr r5,=vol3
-	strb r4,[r5]
+	strb r4,[r5,#vol3-vol0]
 
 	ands r4,r3,#0x10
 	ldrbne r4,[sccptr,#sccCh4Volume]
 	ands r4,r4,#0x0F
 	ldrbne r4,[r2,r4]
-	ldr r5,=vol4
-	strb r4,[r5]
+	strb r4,[r5,#vol4-vol0]
 
 
 	add r7,sccptr,#sccCh0Freq	;@ counters
@@ -162,33 +169,28 @@ SCCMixer:					;@ r0=len, r1=dest, r2=pointer to SCC struct
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh0Frq]
 	bic r10,r10,#0xF000
-	orr r10,r10,#0x2000
-	mov r2,r2,lsr#14
-	orr r2,r10,r2,lsl#14
+	mov r2,r2,lsr#12
+	orr r2,r10,r2,lsl#12
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh1Frq]
 	bic r10,r10,#0xF000
-	orr r10,r10,#0x2000
-	mov r3,r3,lsr#14
-	orr r3,r10,r3,lsl#14
+	mov r3,r3,lsr#12
+	orr r3,r10,r3,lsl#12
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh2Frq]
 	bic r10,r10,#0xF000
-	orr r10,r10,#0x2000
-	mov r4,r4,lsr#14
-	orr r4,r10,r4,lsl#14
+	mov r4,r4,lsr#12
+	orr r4,r10,r4,lsl#12
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh3Frq]
 	bic r10,r10,#0xF000
-	orr r10,r10,#0x2000
-	mov r5,r5,lsr#14
-	orr r5,r10,r5,lsl#14
+	mov r5,r5,lsr#12
+	orr r5,r10,r5,lsl#12
 ;@--------------------------
 	ldrh r10,[sccptr,#sccCh4Frq]
 	bic r10,r10,#0xF000
-	orr r10,r10,#0x2000
-	mov r6,r6,lsr#14
-	orr r6,r10,r6,lsl#14
+	mov r6,r6,lsr#12
+	orr r6,r10,r6,lsl#12
 ;@--------------------------
 
 	bl SCCMix
@@ -203,6 +205,7 @@ SCCVolume:
 	.byte 0,3,7,10,14,17,20,24,27,31,34,37,41,44,48,51
 ;@----------------------------------------------------------------------------
 SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCC
+	.type   SCCRead STT_FUNC
 ;@----------------------------------------------------------------------------
 	movs r0,r0,lsl#24
 	ldrbpl r0,[r1,r0,lsr#24]
@@ -210,6 +213,7 @@ SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCC
 	bx lr
 ;@----------------------------------------------------------------------------
 SCCWrite:					;@ 0x9800-0x9FFF, r0=val, r1=adr, r2=SCC
+	.type   SCCWrite STT_FUNC
 ;@----------------------------------------------------------------------------
 	and r1,r1,#0xFF				;@ 0x00-0x7F wave ram.
 	cmp r1,#0x90				;@ 0x80-0x8F registers, 0x90-0x9F mirror.
