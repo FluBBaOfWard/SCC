@@ -45,7 +45,7 @@ typedef struct {
 } SCC;
 
 void SCCReset(SCC *chip);
-void SCCMixer(int len, void *dest, SCC *chip);
+void SCCMixer(int len, s16 *dest, SCC *chip);
 void SCCWrite(u8 value, u16 adress, SCC *chip);
 u8 SCCRead(u16 adress, SCC *chip);
 
