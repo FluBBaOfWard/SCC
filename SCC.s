@@ -27,13 +27,13 @@
 ;@ r0  = mix length.
 ;@ r1  = mixerbuffer.
 ;@ r2 -> r6 = pos+freq.
-;@ r7 = sample reg/volume.
-;@ r8 = mixer reg left.
-;@ r9 = scrap
-;@ r10= scrap
-;@ r11= scrap
-;@ r12= SCC ptr
-;@ lr = return address.
+;@ r7  = sample reg/volume.
+;@ r8  = mixer reg left.
+;@ r9  = scrap
+;@ r10 = scrap
+;@ r11 = scrap
+;@ r12 = SCC ptr
+;@ lr  = return address.
 ;@----------------------------------------------------------------------------
 SCCMix:
 //IIIIIVCCCCCCCCCCCC10FFFFFFFFFFFF

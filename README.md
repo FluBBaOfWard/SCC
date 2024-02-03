@@ -11,6 +11,7 @@ Produces signed 16bit mono.
 ## Projects that use this code
 
 * https://github.com/FluBBaOfWard/S8DS
+* https://github.com/wavemotion-dave/ColecoDS
 
 ## Credits
 

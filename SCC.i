@@ -10,7 +10,7 @@
 
 #if !__ASSEMBLER__
 	#error This header file is only for use in assembly files!
-#endif	// !__ASSEMBLER__
+#endif
 
 	sccptr			.req r12
 
