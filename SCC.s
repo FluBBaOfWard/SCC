@@ -9,10 +9,15 @@
 
 #include "SCC.i"
 
-#define SCCDIVIDE 16
+#if !defined(SCCDIVIDE)
+	#define SCCDIVIDE 16
+#endif
 #define SCCADDITION 0x00004000*SCCDIVIDE
 
 	.global SCCReset
+	.global SCCSaveState
+	.global SCCLoadState
+	.global SCCGetStateSize
 	.global SCCMixer
 	.global SCCWrite
 	.global SCCRead
@@ -30,90 +35,85 @@
 ;@ r3 -> r7 = pos+freq.
 ;@ r8  = Sample reg/volume.
 ;@ r9  = Mixer reg.
-;@ r10 = Sample ptr.
-;@ r12 = Scrap
 ;@ lr  = Scrap.
 ;@----------------------------------------------------------------------------
 //IIIIIVCCCCCCCCCCCC10FFFFFFFFFFFF
 //I=sampleindex, V=overflow, C=counter, F=frequency
 ;@----------------------------------------------------------------------------
-SCCMixer:					;@ r0=len, r1=dest, r2=pointer to SCC struct
+SCCMixer:					;@ r0=len, r1=dest, r2=SCCptr
 	.type   SCCMixer STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r11,lr}
-	add r8,r2,#sccCh0Freq	;@ counters
-	ldmia r8,{r3-r7}
+	stmfd sp!,{r4-r9,lr}
+	ldmia r2!,{r3-r7}			;@ r2 now points to Ch0 wave.
 ;@----------------------------------------------------------------------------
 sccMixLoop:
 	add r3,r3,#SCCADDITION
-	movs r10,r3,lsr#27
-	mov r12,r3,lsl#18
-	subcs r3,r3,r12,asr#4
+	movs lr,r3,lsr#27
+	mov r8,r3,lsl#18
+	subcs r3,r3,r8,asr#4
 vol0:
-	movs r9,#0x00				;@ volume
-	ldrsbne r12,[r2,r10]		;@ Channel 0
-	mulne r9,r12,r9
+	movs r9,#0x00				;@ Volume
+	ldrsbne lr,[r2,lr]			;@ Channel 0
+	mulne r9,lr,r9
 
 
 	add r4,r4,#SCCADDITION
-	movs r10,r4,lsr#27
-	add r10,r10,#0x20
-	mov r12,r4,lsl#18
-	subcs r4,r4,r12,asr#4
+	movs lr,r4,lsr#27
+	add lr,lr,#0x20
+	mov r8,r4,lsl#18
+	subcs r4,r4,r8,asr#4
 vol1:
-	movs r8,#0x00				;@ volume
-	ldrsbne r12,[r2,r10]		;@ Channel 1
-	mlane r9,r8,r12,r9
+	movs r8,#0x00				;@ Volume
+	ldrsbne lr,[r2,lr]			;@ Channel 1
+	mlane r9,r8,lr,r9
 
 
 	add r5,r5,#SCCADDITION
-	movs r10,r5,lsr#27
-	add r10,r10,#0x40
-	mov r12,r5,lsl#18
-	subcs r5,r5,r12,asr#4
+	movs lr,r5,lsr#27
+	add lr,lr,#0x40
+	mov r8,r5,lsl#18
+	subcs r5,r5,r8,asr#4
 vol2:
-	movs r8,#0x00				;@ volume
-	ldrsbne r12,[r2,r10]		;@ Channel 2
-	mlane r9,r8,r12,r9
+	movs r8,#0x00				;@ Volume
+	ldrsbne lr,[r2,lr]			;@ Channel 2
+	mlane r9,r8,lr,r9
 
 
 	add r6,r6,#SCCADDITION
-	movs r10,r6,lsr#27
-	add r10,r10,#0x60
-	mov r12,r6,lsl#18
-	subcs r6,r6,r12,asr#4
+	movs lr,r6,lsr#27
+	add lr,lr,#0x60
+	mov r8,r6,lsl#18
+	subcs r6,r6,r8,asr#4
 vol3:
-	movs r8,#0x00				;@ volume
-	ldrsbne r12,[r2,r10]		;@ Channel 3
-	mlane r9,r8,r12,r9
+	movs r8,#0x00				;@ Volume
+	ldrsbne lr,[r2,lr]			;@ Channel 3
+	mlane r9,r8,lr,r9
 
 
 	add r7,r7,#SCCADDITION
-	movs r10,r7,lsr#27
-	add r10,r10,#0x60
-	mov r12,r7,lsl#18
-	subcs r7,r7,r12,asr#4
+	movs lr,r7,lsr#27
+	add lr,lr,#0x60
+	mov r8,r7,lsl#18
+	subcs r7,r7,r8,asr#4
 vol4:
-	movs r8,#0x00				;@ volume
-	ldrsbne r12,[r2,r10]		;@ Channel 4, same waveform as ch3
-	mlane r9,r8,r12,r9
+	movs r8,#0x00				;@ Volume
+	ldrsbne lr,[r2,lr]			;@ Channel 4, same waveform as ch3
+	mlane r9,r8,lr,r9
 
 
 	subs r0,r0,#1
 	strhpl r9,[r1],#2
 	bhi sccMixLoop
 
-	add r8,r2,#sccCh0Freq		;@ counters
-	stmia r8,{r3-r7}
-
-	ldmfd sp!,{r4-r11,lr}
+	stmdb r2!,{r3-r7}
+	ldmfd sp!,{r4-r9,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
 	.section .text
 	.align 2
 ;@----------------------------------------------------------------------------
-SCCReset:					;@ r0=pointer to SCC struct
+SCCReset:					;@ r0=SCCptr
 	.type   SCCReset STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r0,lr}
@@ -129,26 +129,34 @@ SCCReset:					;@ r0=pointer to SCC struct
 	strb r1,[r0,#sccCh4Freq+1]	;@ counters
 	bx lr
 ;@----------------------------------------------------------------------------
-SCCSaveState:				;@ In r0=destination, r1=snptr. Out r0=state size.
+SCCSaveState:				;@ In r0=destination, r1=SCCptr. Out r0=state size.
 	.type   SCCSaveState STT_FUNC
 ;@----------------------------------------------------------------------------
+	add r1,r1,#sccStateStart
 	mov r2,#sccStateEnd-sccStateStart
 	stmfd sp!,{r2,lr}
-
 	bl memcpy
-
 	ldmfd sp!,{r0,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
-SCCLoadState:				;@ In r0=snptr, r1=source. Out r0=state size.
+SCCLoadState:				;@ In r0=SCCptr, r1=source. Out r0=state size.
 	.type   SCCLoadState STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r0,lr}
-
+	stmfd sp!,{r4,r5,lr}
+	mov r4,r0
+	add r0,r0,#sccStateStart
 	mov r2,#sccStateEnd-sccStateStart
 	bl memcpy
-	ldmfd sp!,{r0,lr}
-
+	mov r5,#0xF
+stateLoop:
+	add r2,r4,#sccStateStart
+	add r1,r5,#0x80
+	ldrb r0,[r2,r1]
+	mov r2,r4
+	bl SCCWrite
+	subs r5,r5,#1
+	bpl stateLoop
+	ldmfd sp!,{r4,r5,lr}
 ;@----------------------------------------------------------------------------
 SCCGetStateSize:			;@ Out r0=state size.
 	.type   SCCGetStateSize STT_FUNC
@@ -159,7 +167,7 @@ SCCGetStateSize:			;@ Out r0=state size.
 SCCVolume:
 	.byte 0,3,7,10,14,17,20,24,27,31,34,37,41,44,48,51
 ;@----------------------------------------------------------------------------
-SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCC
+SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCCptr
 	.type   SCCRead STT_FUNC
 ;@----------------------------------------------------------------------------
 	movs r0,r0,lsl#24
@@ -167,14 +175,15 @@ SCCRead:					;@ 0x9800-0x9FFF, r0=adr, r1=SCC
 	movmi r0,#0xFF
 	bx lr
 ;@----------------------------------------------------------------------------
-SCCWrite:					;@ 0x9800-0x9FFF, r0=val, r1=adr, r2=SCC
+SCCWrite:					;@ 0x9800-0x9FFF, r0=val, r1=adr, r2=SCCptr
 	.type   SCCWrite STT_FUNC
 ;@----------------------------------------------------------------------------
 	and r1,r1,#0xFF				;@ 0x00-0x7F wave ram.
 	cmp r1,#0x90				;@ 0x80-0x8F registers, 0x90-0x9F mirror.
 	subpl r1,r1,#0x10			;@ 0xE0-0xFF test register, all mirrors.
 	cmp r1,#0x90
-	strbmi r0,[r2,r1]
+	add r3,r2,#sccCh0Wave
+	strbmi r0,[r3,r1]
 	strbpl r0,[r2,#sccTestReg]
 	bxpl lr
 	subs r1,r1,#0x80

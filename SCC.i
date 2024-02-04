@@ -12,10 +12,19 @@
 	#error This header file is only for use in assembly files!
 #endif
 
-	sccptr			.req r12
-
 							;@ SCC.s
 	.struct 0
+sccCh0Freq:		.short 0
+sccCh0Addr:		.short 0
+sccCh1Freq:		.short 0
+sccCh1Addr:		.short 0
+sccCh2Freq:		.short 0
+sccCh2Addr:		.short 0
+sccCh3Freq:		.short 0
+sccCh3Addr:		.short 0
+sccCh4Freq:		.short 0
+sccCh4Addr:		.short 0
+
 sccStateStart:
 sccCh0Wave:		.space 32	;@ 0x00-0x1F
 sccCh1Wave:		.space 32	;@ 0x20-0x3F
@@ -36,17 +45,6 @@ sccChControl:	.byte 0		;@ 0x8F/0x9F
 sccTestReg:		.byte 0		;@ 0xE0-0xFF
 sccPadding:		.space 3
 sccStateEnd:
-
-sccCh0Freq:		.short 0
-sccCh0Addr:		.short 0
-sccCh1Freq:		.short 0
-sccCh1Addr:		.short 0
-sccCh2Freq:		.short 0
-sccCh2Addr:		.short 0
-sccCh3Freq:		.short 0
-sccCh3Addr:		.short 0
-sccCh4Freq:		.short 0
-sccCh4Addr:		.short 0
 
 sccSize:
 
