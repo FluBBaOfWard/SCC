@@ -3,7 +3,8 @@ SCC revision history
 
 
 V0.2.3 - 2024-02-04 (FluBBa)
-	Otimization of mixer start.
+	Optimization of mixer start.
+	Small optimization of mixer.
 	Added load/save state.
 
 V0.2.2 - 2023-11-18 (FluBBa)

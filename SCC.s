@@ -9,10 +9,10 @@
 
 #include "SCC.i"
 
-#if !defined(SCCDIVIDE)
-	#define SCCDIVIDE 16
+#if !defined(SCCMULT)
+	#define SCCMULT 16
 #endif
-#define SCCADDITION 0x00004000*SCCDIVIDE
+#define SCCADDITION 0x00004000*SCCMULT
 
 	.global SCCReset
 	.global SCCSaveState
@@ -43,8 +43,11 @@
 SCCMixer:					;@ r0=len, r1=dest, r2=SCCptr
 	.type   SCCMixer STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r9,lr}
+	stmfd sp!,{r4-r11,lr}
 	ldmia r2!,{r3-r7}			;@ r2 now points to Ch0 wave.
+	add r10,r2,#0x20			;@ Ch1 Wave
+	add r11,r2,#0x40			;@ Ch2 Wave
+	add r12,r2,#0x60			;@ Ch3/4 Wave
 ;@----------------------------------------------------------------------------
 sccMixLoop:
 	add r3,r3,#SCCADDITION
@@ -59,45 +62,41 @@ vol0:
 
 	add r4,r4,#SCCADDITION
 	movs lr,r4,lsr#27
-	add lr,lr,#0x20
 	mov r8,r4,lsl#18
 	subcs r4,r4,r8,asr#4
 vol1:
 	movs r8,#0x00				;@ Volume
-	ldrsbne lr,[r2,lr]			;@ Channel 1
+	ldrsbne lr,[r10,lr]			;@ Channel 1
 	mlane r9,r8,lr,r9
 
 
 	add r5,r5,#SCCADDITION
 	movs lr,r5,lsr#27
-	add lr,lr,#0x40
 	mov r8,r5,lsl#18
 	subcs r5,r5,r8,asr#4
 vol2:
 	movs r8,#0x00				;@ Volume
-	ldrsbne lr,[r2,lr]			;@ Channel 2
+	ldrsbne lr,[r11,lr]			;@ Channel 2
 	mlane r9,r8,lr,r9
 
 
 	add r6,r6,#SCCADDITION
 	movs lr,r6,lsr#27
-	add lr,lr,#0x60
 	mov r8,r6,lsl#18
 	subcs r6,r6,r8,asr#4
 vol3:
 	movs r8,#0x00				;@ Volume
-	ldrsbne lr,[r2,lr]			;@ Channel 3
+	ldrsbne lr,[r12,lr]			;@ Channel 3
 	mlane r9,r8,lr,r9
 
 
 	add r7,r7,#SCCADDITION
 	movs lr,r7,lsr#27
-	add lr,lr,#0x60
 	mov r8,r7,lsl#18
 	subcs r7,r7,r8,asr#4
 vol4:
 	movs r8,#0x00				;@ Volume
-	ldrsbne lr,[r2,lr]			;@ Channel 4, same waveform as ch3
+	ldrsbne lr,[r12,lr]			;@ Channel 4, same waveform as ch3
 	mlane r9,r8,lr,r9
 
 
@@ -106,7 +105,7 @@ vol4:
 	bhi sccMixLoop
 
 	stmdb r2!,{r3-r7}
-	ldmfd sp!,{r4-r9,lr}
+	ldmfd sp!,{r4-r11,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
@@ -216,9 +215,9 @@ sccCh0FreqHW:
 ;@----------------------------------------------------------------------------
 	ldrb r1,[r2,#sccCh0Freq+1]
 	and r0,r0,#0x0F
-	and r1,r1,#0xF0
-	orr r0,r0,r1
-	strb r0,[r2,#sccCh0Freq+1]
+	bic r1,r1,#0x0F
+	orr r1,r1,r0
+	strb r1,[r2,#sccCh0Freq+1]
 	bx lr
 ;@----------------------------------------------------------------------------
 sccCh1FreqLW:
@@ -230,9 +229,9 @@ sccCh1FreqHW:
 ;@----------------------------------------------------------------------------
 	ldrb r1,[r2,#sccCh1Freq+1]
 	and r0,r0,#0x0F
-	and r1,r1,#0xF0
-	orr r0,r0,r1
-	strb r0,[r2,#sccCh1Freq+1]
+	bic r1,r1,#0x0F
+	orr r1,r1,r0
+	strb r1,[r2,#sccCh1Freq+1]
 	bx lr
 ;@----------------------------------------------------------------------------
 sccCh2FreqLW:
@@ -244,9 +243,9 @@ sccCh2FreqHW:
 ;@----------------------------------------------------------------------------
 	ldrb r1,[r2,#sccCh2Freq+1]
 	and r0,r0,#0x0F
-	and r1,r1,#0xF0
-	orr r0,r0,r1
-	strb r0,[r2,#sccCh2Freq+1]
+	bic r1,r1,#0x0F
+	orr r1,r1,r0
+	strb r1,[r2,#sccCh2Freq+1]
 	bx lr
 ;@----------------------------------------------------------------------------
 sccCh3FreqLW:
@@ -258,9 +257,9 @@ sccCh3FreqHW:
 ;@----------------------------------------------------------------------------
 	ldrb r1,[r2,#sccCh3Freq+1]
 	and r0,r0,#0x0F
-	and r1,r1,#0xF0
-	orr r0,r0,r1
-	strb r0,[r2,#sccCh3Freq+1]
+	bic r1,r1,#0x0F
+	orr r1,r1,r0
+	strb r1,[r2,#sccCh3Freq+1]
 	bx lr
 ;@----------------------------------------------------------------------------
 sccCh4FreqLW:
@@ -272,9 +271,9 @@ sccCh4FreqHW:
 ;@----------------------------------------------------------------------------
 	ldrb r1,[r2,#sccCh4Freq+1]
 	and r0,r0,#0x0F
-	and r1,r1,#0xF0
-	orr r0,r0,r1
-	strb r0,[r2,#sccCh4Freq+1]
+	bic r1,r1,#0x0F
+	orr r1,r1,r0
+	strb r1,[r2,#sccCh4Freq+1]
 	bx lr
 ;@----------------------------------------------------------------------------
 sccCh0VolW:
