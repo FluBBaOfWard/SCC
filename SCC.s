@@ -33,8 +33,8 @@
 ;@ r1  = Mixerbuffer.
 ;@ r2  = sccptr.
 ;@ r3 -> r7 = pos+freq.
-;@ r8  = Sample reg/volume.
-;@ r9  = Mixer reg.
+;@ r8  = Mixer reg.
+;@ r9  = Sample reg/volume.
 ;@ lr  = Scrap.
 ;@----------------------------------------------------------------------------
 //IIIIIVCCCCCCCCCCCC10FFFFFFFFFFFF
@@ -52,56 +52,56 @@ SCCMixer:					;@ r0=len, r1=dest, r2=SCCptr
 sccMixLoop:
 	add r3,r3,#SCCADDITION
 	movs lr,r3,lsr#27
-	mov r8,r3,lsl#18
-	subcs r3,r3,r8,asr#4
+	mov r9,r3,lsl#18
+	subcs r3,r3,r9,asr#4
 vol0:
-	movs r9,#0x00				;@ Volume
+	movs r8,#0x00				;@ Volume
 	ldrsbne lr,[r2,lr]			;@ Channel 0
-	mulne r9,lr,r9
+	mulne r8,lr,r8
 
 
 	add r4,r4,#SCCADDITION
 	movs lr,r4,lsr#27
-	mov r8,r4,lsl#18
-	subcs r4,r4,r8,asr#4
+	mov r9,r4,lsl#18
+	subcs r4,r4,r9,asr#4
 vol1:
-	movs r8,#0x00				;@ Volume
+	movs r9,#0x00				;@ Volume
 	ldrsbne lr,[r10,lr]			;@ Channel 1
-	mlane r9,r8,lr,r9
+	mlane r8,r9,lr,r8
 
 
 	add r5,r5,#SCCADDITION
 	movs lr,r5,lsr#27
-	mov r8,r5,lsl#18
-	subcs r5,r5,r8,asr#4
+	mov r9,r5,lsl#18
+	subcs r5,r5,r9,asr#4
 vol2:
-	movs r8,#0x00				;@ Volume
+	movs r9,#0x00				;@ Volume
 	ldrsbne lr,[r11,lr]			;@ Channel 2
-	mlane r9,r8,lr,r9
+	mlane r8,r9,lr,r8
 
 
 	add r6,r6,#SCCADDITION
 	movs lr,r6,lsr#27
-	mov r8,r6,lsl#18
-	subcs r6,r6,r8,asr#4
+	mov r9,r6,lsl#18
+	subcs r6,r6,r9,asr#4
 vol3:
-	movs r8,#0x00				;@ Volume
+	movs r9,#0x00				;@ Volume
 	ldrsbne lr,[r12,lr]			;@ Channel 3
-	mlane r9,r8,lr,r9
+	mlane r8,r9,lr,r8
 
 
 	add r7,r7,#SCCADDITION
 	movs lr,r7,lsr#27
-	mov r8,r7,lsl#18
-	subcs r7,r7,r8,asr#4
+	mov r9,r7,lsl#18
+	subcs r7,r7,r9,asr#4
 vol4:
-	movs r8,#0x00				;@ Volume
+	movs r9,#0x00				;@ Volume
 	ldrsbne lr,[r12,lr]			;@ Channel 4, same waveform as ch3
-	mlane r9,r8,lr,r9
+	mlane r8,r9,lr,r8
 
 
 	subs r0,r0,#1
-	strhpl r9,[r1],#2
+	strhpl r8,[r1],#2
 	bhi sccMixLoop
 
 	stmdb r2!,{r3-r7}
