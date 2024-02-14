@@ -2,7 +2,9 @@ SCC revision history
 -=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.2.4 - 2024-02-12 (FluBBa)
+V0.2.5 - 2024-02-14 (FluBBa)
+	Added support for internal downsampling.
+	Added support for internal filtering.
 	Optimization of mixer start.
 	Small optimization of mixer.
 	Added load/save state.

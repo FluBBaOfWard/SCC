@@ -14,6 +14,19 @@ extern "C" {
 #endif
 
 typedef struct {
+	u16 ch0Freq;
+	u16 ch0Addr;
+	u16 ch1Freq;
+	u16 ch1Addr;
+	u16 ch2Freq;
+	u16 ch2Addr;
+	u16 ch3Freq;
+	u16 ch3Addr;
+	u16 ch4Freq;
+	u16 ch4Addr;
+
+	s32 oldSample;
+
 	s8 ch0Wave[32];
 	s8 ch1Wave[32];
 	s8 ch2Wave[32];
@@ -31,17 +44,6 @@ typedef struct {
 	u8 chControl;
 	u8 testReg;
 	u8 padding[3];
-
-	u16 ch0Freq;
-	u16 ch0Addr;
-	u16 ch1Freq;
-	u16 ch1Addr;
-	u16 ch2Freq;
-	u16 ch2Addr;
-	u16 ch3Freq;
-	u16 ch3Addr;
-	u16 ch4Freq;
-	u16 ch4Addr;
 } SCC;
 
 /**

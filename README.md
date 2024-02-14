@@ -1,4 +1,4 @@
-# SCC V0.2.3
+# SCC V0.2.5
 
 Konami SCC/K051649 sound chip emulator for ARM32.
 

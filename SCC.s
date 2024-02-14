@@ -9,6 +9,16 @@
 
 #include "SCC.i"
 
+#ifdef SCC_UPSHIFT
+	.equ USHIFT, SCC_UPSHIFT
+#else
+	.equ USHIFT, 0
+#endif
+#ifdef SCCFILTER
+	.equ FSHIFT, SCCFILTER
+#else
+	.equ FSHIFT, 1
+#endif
 #if !defined(SCCMULT)
 	#define SCCMULT 16
 #endif
@@ -43,21 +53,26 @@
 SCCMixer:					;@ r0=len, r1=dest, r2=SCCptr
 	.type   SCCMixer STT_FUNC
 ;@----------------------------------------------------------------------------
+#ifdef SCC_UPSHIFT
+	mov r0,r0,lsl#USHIFT
+#endif
 	stmfd sp!,{r4-r11,lr}
-	ldmia r2!,{r3-r7}			;@ r2 now points to Ch0 wave.
+	ldmia r2!,{r3-r8}			;@ r2 now points to Ch0 wave.
 	add r10,r2,#0x20			;@ Ch1 Wave
 	add r11,r2,#0x40			;@ Ch2 Wave
 	add r12,r2,#0x60			;@ Ch3/4 Wave
 ;@----------------------------------------------------------------------------
-sccMixLoop:
+mixLoop:
+	sub r8,r8,r8,asr#FSHIFT
+innerMixLoop:
 	add r3,r3,#SCCADDITION
 	movs lr,r3,lsr#27
 	mov r9,r3,lsl#18
 	subcs r3,r3,r9,asr#4
 vol0:
-	movs r8,#0x00				;@ Volume
+	movs r9,#0x00				;@ Volume
 	ldrsbne lr,[r2,lr]			;@ Channel 0
-	mulne r8,lr,r8
+	mlane r8,r9,lr,r8
 
 
 	add r4,r4,#SCCADDITION
@@ -99,12 +114,17 @@ vol4:
 	ldrsbne lr,[r12,lr]			;@ Channel 4, same waveform as ch3
 	mlane r8,r9,lr,r8
 
-
 	subs r0,r0,#1
-	strhpl r8,[r1],#2
-	bhi sccMixLoop
+#ifdef SCC_UPSHIFT
+	tst r0,#(1<<USHIFT)-1
+	bne innerMixLoop
+	cmp r0,#0
+#endif
+	mov lr,r8,asr#FSHIFT+USHIFT
+	strhpl lr,[r1],#2
+	bhi mixLoop
 
-	stmdb r2!,{r3-r7}
+	stmdb r2!,{r3-r8}
 	ldmfd sp!,{r4-r11,lr}
 	bx lr
 ;@----------------------------------------------------------------------------

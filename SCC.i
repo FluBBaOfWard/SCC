@@ -25,6 +25,8 @@ sccCh3Addr:		.short 0
 sccCh4Freq:		.short 0
 sccCh4Addr:		.short 0
 
+sccOldSample:	.long 0
+
 sccStateStart:
 sccCh0Wave:		.space 32	;@ 0x00-0x1F
 sccCh1Wave:		.space 32	;@ 0x20-0x3F
